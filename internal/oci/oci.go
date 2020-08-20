@@ -75,6 +75,7 @@ type RuntimeImpl interface {
 	PortForwardContainer(*Container, int32, io.ReadWriter) error
 	ReopenContainerLog(*Container) error
 	WaitContainerStateStopped(context.Context, *Container) error
+	ShutdownContainerRuntime(*Container) error
 }
 
 // New creates a new Runtime with options provided
@@ -392,6 +393,16 @@ func (r *Runtime) PortForwardContainer(c *Container, port int32, stream io.ReadW
 	}
 
 	return impl.PortForwardContainer(c, port, stream)
+}
+
+// ShutdownContainerRuntime kills the runtime process when using the VM runtime type.
+func (r *Runtime) ShutdownContainerRuntime(c *Container) error {
+	impl, err := r.RuntimeImpl(c)
+	if err != nil {
+		return err
+	}
+
+	return impl.ShutdownContainerRuntime(c)
 }
 
 // ReopenContainerLog reopens the log file of a container.

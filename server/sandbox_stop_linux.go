@@ -78,6 +78,10 @@ func (s *Server) stopPodSandbox(ctx context.Context, req *pb.StopPodSandboxReque
 						// assume container already umounted
 						log.Warnf(ctx, "failed to stop container %s in pod sandbox %s: %v", c.Name(), sb.ID(), err)
 					}
+					//log.Debugf(ctx, "shutting down runtime for container %s in pod sandbox %s", c.Name(), sb.ID())
+					//if err := s.Runtime().ShutdownContainerRuntime(c); err != nil && err != ttrpc.ErrClosed {
+					//	log.Warnf(ctx, "failed to shut down container %s runtime in pod sandbox %s: %v", c.Name(), sb.ID(), err)
+					//}
 					if err := s.ContainerStateToDisk(c); err != nil {
 						return errors.Wrapf(err, "write container %q state do disk", c.Name())
 					}
@@ -116,6 +120,10 @@ func (s *Server) stopPodSandbox(ctx context.Context, req *pb.StopPodSandboxReque
 	if err := s.ContainerStateToDisk(podInfraContainer); err != nil {
 		log.Warnf(ctx, "error writing pod infra container %q state to disk: %v", podInfraContainer.ID(), err)
 	}
+	//log.Debugf(ctx, "shutting down runtime for container %s in pod sandbox %s", containers[0].Name(), sb.ID())
+	//if err := s.Runtime().ShutdownContainerRuntime(containers[0]); err != nil && err != ttrpc.ErrClosed {
+	//	log.Warnf(ctx, "failed to shut down container %s runtime in pod sandbox %s: %v", containers[0].Name(), sb.ID(), err)
+	//}
 
 	log.Infof(ctx, "stopped pod sandbox: %s", podInfraContainer.Description())
 

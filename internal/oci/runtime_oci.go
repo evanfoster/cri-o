@@ -994,6 +994,11 @@ func (r *runtimeOCI) ReopenContainerLog(c *Container) error {
 	return nil
 }
 
+// ShutdownContainerRuntime is a no-op for OCI containers.
+func (r *runtimeOCI) ShutdownContainerRuntime(c *Container) error {
+	return nil
+}
+
 // prepareProcessExec returns the path of the process.json used in runc exec -p
 // caller is responsible to close the returned *os.File if needed.
 func prepareProcessExec(c *Container, cmd []string, tty bool) (*os.File, error) {

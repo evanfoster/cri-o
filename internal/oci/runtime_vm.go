@@ -276,12 +276,6 @@ func (r *runtimeVM) StartContainer(c *Container) error {
 			if err1 := r.updateContainerStatus(c); err1 != nil {
 				logrus.Warningf("error updating container status %v", err1)
 			}
-
-			if c.state.Status == ContainerStateStopped {
-				if err1 := r.deleteContainer(c, true); err1 != nil {
-					logrus.WithError(err1).Infof("deleteContainer failed for container %s", c.ID())
-				}
-			}
 		}
 	}()
 
@@ -590,6 +584,20 @@ func (r *runtimeVM) deleteContainer(c *Container, force bool) error {
 	return nil
 }
 
+func (r *runtimeVM) ShutdownContainerRuntime(c *Container) error {
+	logrus.Debug("runtimeVM.ShutdownContainerRuntime() start")
+	defer logrus.Debug("runtimeVM.ShutdownContainerRuntime() stop")
+	if err := r.remove(r.ctx, c.ID(), ""); err != nil {
+		return err
+	}
+
+	_, err := r.task.Shutdown(r.ctx, &task.ShutdownRequest{ID: c.ID()})
+	if err != nil && err != ttrpc.ErrClosed {
+		return err
+	}
+	return nil
+}
+
 // UpdateContainerStatus refreshes the status of the container.
 func (r *runtimeVM) UpdateContainerStatus(c *Container) error {
 	logrus.Debug("runtimeVM.UpdateContainerStatus() start")
@@ -622,6 +630,7 @@ func (r *runtimeVM) updateContainerStatus(c *Container) error {
 		if errors.Cause(err) != ttrpc.ErrClosed {
 			return errdefs.FromGRPC(err)
 		}
+		logrus.Debugf("Updating container status caused %v", err)
 		return errdefs.ErrNotFound
 	}
 
